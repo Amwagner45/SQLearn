@@ -1,9 +1,22 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import path from 'path';
+import fs from 'fs';
 
 export default defineConfig({
-    plugins: [react()],
+    plugins: [
+        react(),
+        {
+            name: 'rename-html',
+            closeBundle() {
+                const src = path.resolve(__dirname, 'dist/index.web.html');
+                const dest = path.resolve(__dirname, 'dist/index.html');
+                if (fs.existsSync(src)) {
+                    fs.renameSync(src, dest);
+                }
+            },
+        },
+    ],
     root: '.',
     base: './',
     resolve: {
