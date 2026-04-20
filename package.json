@@ -7,7 +7,10 @@
     "start": "electron-forge start",
     "package": "electron-forge package",
     "make": "electron-forge make",
-    "generate-data": "tsx scripts/generate-data.ts"
+    "generate-data": "tsx scripts/generate-data.ts",
+    "dev:web": "vite --config vite.web.config.ts",
+    "build:web": "vite build --config vite.web.config.ts",
+    "preview:web": "vite preview --config vite.web.config.ts"
   },
   "keywords": [],
   "author": "SQLearn",

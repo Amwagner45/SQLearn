@@ -1,14 +1,12 @@
-import type { GradingConfig, GradingResult } from '../../shared/types/curriculum';
-import type { QueryResult } from '../../shared/types/database';
-import { executeQuery } from '../database';
-import { normalizeResultSet } from '../../shared/grading/normalizer';
+import type { GradingConfig, GradingResult } from '../shared/types/curriculum';
+import { executeQuery } from './database';
+import { normalizeResultSet } from '../shared/grading/normalizer';
 
 export async function gradeQuery(
     studentSql: string,
     expectedSql: string,
     config: GradingConfig
 ): Promise<GradingResult> {
-    // Execute both queries
     const studentResult = await executeQuery(studentSql);
     if (studentResult.error) {
         return {
@@ -33,11 +31,9 @@ export async function gradeQuery(
         };
     }
 
-    // Normalize both result sets
     const normalizedStudent = normalizeResultSet(studentResult, config);
     const normalizedExpected = normalizeResultSet(expectedResult, config);
 
-    // Check column count
     if (normalizedStudent.columns.length !== normalizedExpected.columns.length) {
         return {
             correct: false,
@@ -49,7 +45,6 @@ export async function gradeQuery(
         };
     }
 
-    // Check column names if required
     if (config.checkColumnNames) {
         const expectedCols = normalizedExpected.columns.map(c => c.toLowerCase()).sort();
         const studentCols = normalizedStudent.columns.map(c => c.toLowerCase()).sort();
@@ -67,7 +62,6 @@ export async function gradeQuery(
         }
     }
 
-    // Check row count
     if (normalizedStudent.rows.length !== normalizedExpected.rows.length) {
         return {
             correct: false,
@@ -79,7 +73,6 @@ export async function gradeQuery(
         };
     }
 
-    // Compare rows
     const diffs = [];
     for (let i = 0; i < normalizedExpected.rows.length; i++) {
         const expRow = normalizedExpected.rows[i];
