@@ -26,10 +26,10 @@ async function boot() {
 
         const root = createRoot(document.getElementById('root')!);
         root.render(<App />);
-    } catch (err) {
+    } catch (err: any) {
         console.error('Failed to initialise SQLearn:', err);
         if (splash) {
-            splash.textContent = 'Failed to load database. Please refresh the page.';
+            splash.textContent = `Failed to load: ${err?.message || err}`;
         }
     }
 }

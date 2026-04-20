@@ -4,14 +4,28 @@ import type { QueryResult, SchemaInfo, TableInfo, ColumnInfo } from '../shared/t
 let db: SqlJsDatabase | null = null;
 
 export async function initDatabase(): Promise<void> {
-    const sqlPromise = initSqlJs({
-        locateFile: (file: string) => `https://sql.js.org/dist/${file}`,
-    });
+    // Fetch both WASM binary and DB file in parallel
+    const wasmUrl = new URL('sql-wasm.wasm', window.location.href).href;
+    const dbUrl = new URL('../assets/sqlearn.db', import.meta.url).href;
 
-    const dbResponse = await fetch(new URL('../assets/sqlearn.db', import.meta.url).href);
-    const dbBuffer = await dbResponse.arrayBuffer();
+    const [wasmResponse, dbResponse] = await Promise.all([
+        fetch(wasmUrl),
+        fetch(dbUrl),
+    ]);
 
-    const SQL = await sqlPromise;
+    if (!wasmResponse.ok) {
+        throw new Error(`Failed to fetch WASM: ${wasmResponse.status}`);
+    }
+    if (!dbResponse.ok) {
+        throw new Error(`Failed to fetch database: ${dbResponse.status}`);
+    }
+
+    const [wasmBinary, dbBuffer] = await Promise.all([
+        wasmResponse.arrayBuffer(),
+        dbResponse.arrayBuffer(),
+    ]);
+
+    const SQL = await initSqlJs({ wasmBinary: new Uint8Array(wasmBinary) });
     db = new SQL.Database(new Uint8Array(dbBuffer));
     console.log('Database loaded in browser');
 }
