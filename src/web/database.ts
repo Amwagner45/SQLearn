@@ -38,7 +38,9 @@ export async function executeQuery(sql: string): Promise<QueryResult> {
         return { columns: [], columnTypes: [], rows: [], rowCount: 0, executionTimeMs: 0, error: 'Empty query' };
     }
 
-    const upperSql = trimmed.toUpperCase();
+    // Strip comments before checking the statement type
+    const stripped = trimmed.replace(/--[^\n]*/g, '').replace(/\/\*[\s\S]*?\*\//g, '').trim();
+    const upperSql = stripped.toUpperCase();
     const allowed = upperSql.startsWith('SELECT') || upperSql.startsWith('WITH') || upperSql.startsWith('EXPLAIN');
     if (!allowed) {
         return {
